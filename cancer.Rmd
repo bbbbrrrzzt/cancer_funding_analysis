@@ -1,0 +1,55 @@
+---
+title: "Cancer Funding Analysis"
+author: "Morgan Lunn"
+date: "2023-03-17"
+output: html_document
+---
+# Introduction
+
+
+The NCI spent around $5.7 billion in 2019 on cancer research, and is projected to spend nearly $7 billion in 2021, making it the largest funder of cancer research globally. These numbers are impressive, but how is this money being spent and how do the NCI and other funders of cancer research determine which areas deserve the most attention?
+
+Ned Sharpless, the current NCI Director, said in a recent live stream that he thinks it is
+
+    >important to communicate how [the NCI] are using taxpayer dollars to address our mission of reducing burden of cancer suffering for all Americans,
+
+implying that the NCI allocate funds so as to reduce this ‘burden’, howsoever it may be defined. However, a 2012 study by Carter and Nguyen suggests that this is not the case: their data show *no relationship between funding and any common measure of burden.* So, how, then are these funds distributed?
+
+Let’s start with the basics: what’s the distribution of funds across cancer sites? The latest data on this is from 2018, but year-to-year agreement of funding was higher than 99% for all years between 2012 and 2018 and was nearly 99% for that whole period — so the numbers from 2018 will most likely be very similar to those from 2023.
+
+# Retrieving data
+
+Firstly, we retrieve the requisite data and include some necessary libraries.
+
+```{r setup}
+library(readxl,ggplot2)
+conditional_survival<-read.csv("~/Programming/Datasets/5_year_conditional_relative_survival_rates_2000-2018.csv",header=TRUE)
+stage_distribution<-read.csv(file="~/Programming/Datasets/cancer_sites_stage_distribution_2010-2019.csv",header=TRUE)
+birth_risk<-read.csv("~/Programming/Datasets/cancer_risk_from_birth_over_time_2017-2019.csv",header=TRUE)
+risk_comparison<-read.csv("~/Programming/Datasets/comparison_of_cancer_risk_2017-2019.csv",header=TRUE)
+longterm_incidence<-read.csv("~/Programming/Datasets/long_term_trends_in_age_adjusted_incidence_rates_1975-2019.csv",header=TRUE)
+longterm_mortality<-read.csv("~/Programming/Datasets/long_term_trends_in_age_adjusted_mortality_rates_1975-2020.csv.csv",header=TRUE)
+alive_with_cancer<-read.csv("~/Programming/Datasets/people_alive_with_cancer_US_prevalence_jan1_2019.csv",header=TRUE)
+funding_nci_2018<-read_excel("~/Programming/Datasets/NCIPortfolioData_FY2018.xls",skip=1,col_names = TRUE)
+mortality_rates<-read.csv("~/Programming/Datasets/us_mortality_2000-2020.csv")
+```
+
+I use several other data sources in this report and will source them as and when it is necessary to do so.
+
+# Making charts
+## Pie charts
+```{r pie_charts, echo=FALSE}
+# for (i in c(1:10)) {
+#   pie(x=as.numeric(stage_distribution[3:6,i+1]),labels=stage_distribution[3:6,1],main=colnames(stage_distribution[i+1]))
+# }
+```
+
+Let's look at only the top 15 most funded cancer sites. The biggest reason for this restriction is that the data is more difficult to properly visualise otherwise.
+
+```{r top_15_funded}
+s<-funding_nci_2018[order(funding_nci_2018$`Total Funded Amount`,decreasing=TRUE),]
+pie(x=s$`Total Funded Amount`[1:15],labels=s$`Category Name`[1:15])
+```
+
+We can compare the funding allocated to each site to a basic measure of burden, such as mortality rates.
+
